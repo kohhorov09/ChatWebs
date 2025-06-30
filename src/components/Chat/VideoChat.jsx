@@ -11,14 +11,14 @@ import Button from "@mui/material/Button";
 import recon from "../../Img/rec.gif";
 import recoff from "../../Img/1-removebg-preview.png";
 
-const socket = io("http://localhost:3001");
+const socket = io("https://server-js-3-k2hb.onrender.com");
 
 const VideoChat = () => {
   const [peers, setPeers] = useState({});
   const [cameraOn, setCameraOn] = useState(false);
   const [micOn, setMicOn] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0); // ⏱️ Yozish vaqti
+  const [recordingTime, setRecordingTime] = useState(0);
   const recordingInterval = useRef(null);
 
   const myVideo = useRef();
@@ -30,13 +30,10 @@ const VideoChat = () => {
 
   useEffect(() => {
     peer.current = new Peer();
-
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         streamRef.current = stream;
-
-        // 🔇 Videoni boshlanishda o‘chirib qo‘yamiz
         const videoTrack = stream.getVideoTracks()[0];
         const audioTrack = stream.getAudioTracks()[0];
         videoTrack.enabled = false;
@@ -70,21 +67,6 @@ const VideoChat = () => {
           if (videosRef.current[userId]) {
             videosRef.current[userId].remove();
             delete videosRef.current[userId];
-          }
-        });
-
-        socket.on("toggle-mic", ({ userId, enabled }) => {
-          const videoEl = videosRef.current[userId];
-          if (videoEl) {
-            videoEl.muted = !enabled;
-            videoEl.volume = enabled ? 1 : 0;
-          }
-        });
-
-        socket.on("toggle-camera", ({ userId, enabled }) => {
-          const videoEl = videosRef.current[userId];
-          if (videoEl) {
-            videoEl.style.display = enabled ? "block" : "none";
           }
         });
       });
@@ -164,7 +146,7 @@ const VideoChat = () => {
 
       mediaRecorder.current.start();
       setRecording(true);
-      setRecordingTime(0); // ⏱️ Boshlanish
+      setRecordingTime(0);
       recordingInterval.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
@@ -177,7 +159,7 @@ const VideoChat = () => {
     if (mediaRecorder.current && recording) {
       mediaRecorder.current.stop();
       setRecording(false);
-      clearInterval(recordingInterval.current); // ⏱️ To‘xtatish
+      clearInterval(recordingInterval.current);
     }
   };
 
@@ -209,51 +191,25 @@ const VideoChat = () => {
       </div>
 
       <div className="flex gap-4 mt-4 flex-wrap justify-center">
-        <button
+        <Button
           onClick={toggleCamera}
-          style={{
-            border: "none",
-            borderRadius: "5px",
-            background: "none",
-            padding: "15px",
-          }}
+          variant="outlined"
+          sx={{ padding: "15px" }}
         >
-          <Button variant="outlined" sx={{ padding: "15px" }}>
-            {cameraOn ? (
-              <PiVideoCameraDuotone />
-            ) : (
-              <PiVideoCameraSlashDuotone />
-            )}
-          </Button>
-        </button>
+          {cameraOn ? <PiVideoCameraDuotone /> : <PiVideoCameraSlashDuotone />}
+        </Button>
 
-        <button
-          onClick={toggleMic}
-          style={{
-            border: "none",
-            borderRadius: "5px",
-            background: "none",
-            padding: "15px",
-          }}
-        >
-          <Button variant="outlined" sx={{ padding: "15px" }}>
-            {micOn ? <CiMicrophoneOn /> : <CiMicrophoneOff />}
-          </Button>
-        </button>
+        <Button onClick={toggleMic} variant="outlined" sx={{ padding: "15px" }}>
+          {micOn ? <CiMicrophoneOn /> : <CiMicrophoneOff />}
+        </Button>
 
-        <button
+        <Button
           onClick={recording ? stopRecording : startRecording}
-          style={{
-            border: "none",
-            borderRadius: "5px",
-            background: "none",
-            padding: "15px",
-          }}
+          variant="outlined"
+          sx={{ padding: "9px" }}
         >
-          <Button variant="outlined" sx={{ padding: "9px" }}>
-            <img src={recording ? recon : recoff} alt="rec" width={50} />
-          </Button>
-        </button>
+          <img src={recording ? recon : recoff} alt="rec" width={50} />
+        </Button>
 
         {recording && (
           <div className="text-red-600 text-center font-bold text-xl mb-2">
